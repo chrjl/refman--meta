@@ -1,0 +1,53 @@
+name: ${PROJECT_NAME}
+
+services:
+  server:
+    image: ${NODE_IMAGE}
+    user: ${SERVER_USER}
+    hostname: refman-server
+    working_dir: ${SERVER_WORKDIR}
+    tty: true
+
+    volumes:
+      - type: bind
+        source: ./server
+        target: ${SERVER_WORKDIR}
+      - type: bind
+        source: ./data-layer/storage
+        target: ${SERVER_WORKDIR}/storage
+    ports:
+      - target: 3000
+        published: 3000
+    networks:
+      - project
+
+    entrypoint:
+      - npm
+      - run
+      - ${APP_ENVIRONMENT}
+
+  client:
+    image: ${NODE_IMAGE}
+    user: node
+    hostname: refman-client
+    working_dir: /home/node/app
+    tty: true
+
+    entrypoint:
+      - npm
+      - run
+      - dev
+    volumes:
+      - type: bind
+        source: ./client
+        target: /home/node/app
+    ports:
+      - 80
+      # - target: 80
+      #   published: 8080
+    networks:
+      - project
+
+networks:
+  project:
+    name: ${PROJECT_NAME}
